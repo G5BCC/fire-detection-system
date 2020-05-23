@@ -1,4 +1,4 @@
-// Link Circuits: https://www.tinkercad.com/things/37ZMHeRq6PL-mestre-escravo/editel?sharecode=TLPgk7m2HaQtcRZ3iuPSEEPqf4sRszDQYO2ztKLT-ok
+// Link Circuits: https://www.tinkercad.com/things/37ZMHeRq6PL-mestre-escravo/editel?sharecode=uk_3F3u3vzGGc00bNpZa_nuqQCyqDc-KUgMwVkn1uI8
 
 #include <SoftwareSerial.h>
 
@@ -11,6 +11,9 @@ TX = digital pin 8, RX = digital pin 9
 
 Third slave:
 TX = digital pin 6, RX = digital pin 7
+
+Fourth slave:
+TX = digital pin 4, RX = digital pin 5
 */
 int const FIRST_SLAVE_RX = 11;
 int const FIRST_SLAVE_TX = 10;
@@ -18,10 +21,13 @@ int const SECOND_SLAVE_RX = 9;
 int const SECOND_SLAVE_TX = 8;
 int const THIRD_SLAVE_RX = 7;
 int const THIRD_SLAVE_TX = 6;
+int const FOURTH_SLAVE_RX = 5;
+int const FOURTH_SLAVE_TX = 4;
 
 SoftwareSerial firstSlave(FIRST_SLAVE_RX, FIRST_SLAVE_TX);
 SoftwareSerial secondSlave(SECOND_SLAVE_RX, SECOND_SLAVE_TX);
 SoftwareSerial thirdSlave(THIRD_SLAVE_RX, THIRD_SLAVE_TX);
+SoftwareSerial fourthSlave(FOURTH_SLAVE_RX, FOURTH_SLAVE_TX);
 
 // Data receive/transmit
 char c;
@@ -36,6 +42,7 @@ void initializeSlaves() {
 	firstSlave.begin(9600);
 	secondSlave.begin(9600);
 	thirdSlave.begin(9600);
+	fourthSlave.begin(9600);
 
 	pinMode(FIRST_SLAVE_RX, INPUT);
 	pinMode(FIRST_SLAVE_TX, OUTPUT);
@@ -45,6 +52,9 @@ void initializeSlaves() {
 
 	pinMode(THIRD_SLAVE_RX, INPUT);
 	pinMode(THIRD_SLAVE_TX, OUTPUT);
+
+	pinMode(FOURTH_SLAVE_RX, INPUT);
+	pinMode(FOURTH_SLAVE_TX, OUTPUT);
 }
 
 void setInterval() {

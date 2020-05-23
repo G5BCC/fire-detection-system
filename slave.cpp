@@ -1,4 +1,4 @@
-// Link Circuits: https://www.tinkercad.com/things/37ZMHeRq6PL-mestre-escravo/editel?sharecode=TLPgk7m2HaQtcRZ3iuPSEEPqf4sRszDQYO2ztKLT-ok
+// Link Circuits: https://www.tinkercad.com/things/37ZMHeRq6PL-mestre-escravo/editel?sharecode=uk_3F3u3vzGGc00bNpZa_nuqQCyqDc-KUgMwVkn1uI8
 
 #include <SoftwareSerial.h>
 
@@ -6,6 +6,7 @@
 Firt Slave: TX = digital pin 10, RX = digital pin 11
 Second Slave: TX = digital pin 8, RX = digital pin 9
 Third Slave: TX = digital pin 6, RX = digital pin 7
+Fourth Slave: TX = digital pin 4, RX = digital pin 5
 */
 int const PIN_RX = 11;
 int const PIN_TX = 10;
