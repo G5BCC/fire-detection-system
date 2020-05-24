@@ -131,6 +131,23 @@ void temperatureSensor(){
 	setInterval();
 }
 
+
+/* 
+	Função para quando não há nenhuma emergencia do slave
+
+	paramêtro:
+
+		int id: específica o id do slave
+
+	pseudo código:
+		sobrescreve o estado do slave específicado para "SEM_EMERGENCIA"
+		
+*/
+void semEmergencia(int id){
+	SLAVE_STATE[id] = SEM_EMERGENCIA;
+
+}
+
 /* 
 	Função para quando não teve nenhuma resposta do slave
 
