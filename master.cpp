@@ -205,7 +205,7 @@ void slaveAlerta(int id){
 		emitirAlerta(id);
 		break;
 	case ALERTA_A:
-		// aguardar
+		break;
 	default:
 		STATE_SLAVE[id] = ALERTA;
 		emitirAlerta(id);
@@ -213,6 +213,40 @@ void slaveAlerta(int id){
 	}
 }
 
+
+/* 
+	Função para quando há uma mensagem de emergência
+
+	paramêtro:
+
+		int id: específica o id do slave
+
+	pseudo código:
+
+	se o estado do slave especifico for emergencia, 
+			toca o sinal.
+		se o estado do slave especifico for um emergencia atendido, 
+			aguarda.
+		se nenhuma das ocorrencias for atendido, 
+			estado do slave é sobrescrito para EMERGENCIA e o sinal é tocado.
+
+*/
+void slaveEmergencia(int id){
+	// Para a primeira ocorrencia da emergência
+	switch (STATE_SLAVE[id])
+	{
+	case EMERGENCIA:
+		emitirAlerta(id);
+		break;
+	case EMERGENCIA_A:
+		break;
+	default:
+		STATE_SLAVE[id] = EMERGENCIA;
+		emitirAlerta(id);
+		break;
+	}
+
+}
 
 void setup() {
 	Serial.begin(9600);
@@ -223,9 +257,11 @@ void setup() {
 void loop() {
 	switch (ch) {
 		case 0: gasSensor();         break;
-		case 1: temperatureSensor(); break;
+		case 1: 
+			slaveAlerta(0);
+			break;
 		case 2: 
-			//TODO: mesagem de ok
+			semEmergencia(0);
 			break;
 		default: 
 			semResposta(0);// Substituir "0" por id
