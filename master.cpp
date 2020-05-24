@@ -83,57 +83,6 @@ void setInterval() {
 	delay(200);
 }
 
-void gasSensor() {
-	firstSlave.listen();
-
-	if (firstSlave.isListening()) {
-		if (firstSlave.available() > 0){
-			recData = "";
-
-			while (firstSlave.available()) {
-				c = firstSlave.read();
-				recData += c;
-			}
-
-			int SgasValue = recData.toInt();
-
-			if (SgasValue != 0) {
-				Serial.println(recData);
-				gas = recData;
-				ch = 1;
-			}
-		}
-	}
-
-	setInterval();
-}
-
-void temperatureSensor(){
-	firstSlave.listen();
-
-	if (firstSlave.isListening()) {
-		if (firstSlave.available() > 0) {
-			recData = "";
-
-			while (firstSlave.available()) {
-				c = firstSlave.read();
-				recData += c;
-			}
-
-			float StempValue = recData.toFloat();
-
-			if (StempValue != 0) {
-				Serial.println(recData);
-				temp = recData;
-				ch = 0;
-			}
-		}
-	}
-
-	setInterval();
-}
-
-
 /* 
 	Função para quando não há nenhuma emergencia do slave
 
@@ -256,7 +205,9 @@ void setup() {
 
 void loop() {
 	switch (ch) {
-		case 0: gasSensor();         break;
+		case 0:     
+			slaveEmergencia(0);   
+			break;
 		case 1: 
 			slaveAlerta(0);
 			break;
