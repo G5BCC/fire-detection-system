@@ -29,6 +29,26 @@ SoftwareSerial secondSlave(SECOND_SLAVE_RX, SECOND_SLAVE_TX);
 SoftwareSerial thirdSlave(THIRD_SLAVE_RX, THIRD_SLAVE_TX);
 SoftwareSerial fourthSlave(FOURTH_SLAVE_RX, FOURTH_SLAVE_TX);
 
+// Slaves states
+enum {
+	SEM_RESPOSTA,
+	SEM_EMERGENCIA,
+	ALERTA,
+	EMERGENCIA
+	
+};
+
+int[4] SLAVES_STATES = {
+	slave0 = SEM_EMERGENCIA,
+	slave1 = SEM_EMERGENCIA,
+	slave2 = SEM_EMERGENCIA,
+	slave3 = SEM_EMERGENCIA,
+
+}
+// Not response counter
+
+int* counters = {0,0,0,0};
+
 // Data receive/transmit
 char c;
 String recData, recDataOld;
@@ -111,6 +131,14 @@ void temperatureSensor(){
 	setInterval();
 }
 
+
+void semResposta(int id){
+	if(counters[i] < 3){
+		counters[i]++;
+	} else{
+		SLAVES_STATES[id] = SEM_RESPOSTA;
+	}
+}
 void setup() {
 	Serial.begin(9600);
 
@@ -121,7 +149,12 @@ void loop() {
 	switch (ch) {
 		case 0: gasSensor();         break;
 		case 1: temperatureSensor(); break;
-		default:                     break;
+		case 2: 
+			//TODO: mesagem de ok
+			break;
+		default: 
+			semResposta(0);// Substituir "0" por id
+			break;
 	}
 
 	setInterval();
