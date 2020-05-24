@@ -203,6 +203,25 @@ void slaveEmergencia(int id){
 
 }
 
+void slaveRotina(int id){
+	switch (recData)
+	{
+	case '0':
+		semEmergencia(id);
+		break;
+	case '1':
+		slaveAlerta(id);
+		break;
+	case '2':
+		slaveEmergencia(id);
+		break;
+	default:
+		semResposta(id);
+		break;
+	}
+
+}
+
 void setup() {
 	Serial.begin(9600);
 
@@ -210,20 +229,7 @@ void setup() {
 }
 
 void loop() {
-	switch (ch) {
-		case 0:     
-			slaveEmergencia(0);   
-			break;
-		case 1: 
-			slaveAlerta(0);
-			break;
-		case 2: 
-			semEmergencia(0);
-			break;
-		default: 
-			semResposta(0);// Substituir "0" por id
-			break;
-	}
 
+	slaveRotina(0); // Generalizar
 	setInterval();
 }
