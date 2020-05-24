@@ -29,6 +29,7 @@ SoftwareSerial secondSlave(SECOND_SLAVE_RX, SECOND_SLAVE_TX);
 SoftwareSerial thirdSlave(THIRD_SLAVE_RX, THIRD_SLAVE_TX);
 SoftwareSerial fourthSlave(FOURTH_SLAVE_RX, FOURTH_SLAVE_TX);
 
+SoftwareSerial slaves[4] = {firstSlave, secondSlave, thirdSlave, fourthSlave};
 // Slaves states
 enum {
 	SEM_RESPOSTA,
@@ -60,11 +61,15 @@ int ch = 0;
 String temp;
 String gas;
 
+
+void initializeSlavesSerials(){
+	for(int i = 0; i<4; i++){
+		slaves[i].begin(9600);
+	}
+}
+
 void initializeSlaves() {
-	firstSlave.begin(9600);
-	secondSlave.begin(9600);
-	thirdSlave.begin(9600);
-	fourthSlave.begin(9600);
+	initializeSlaves();
 
 	pinMode(FIRST_SLAVE_RX, INPUT);
 	pinMode(FIRST_SLAVE_TX, OUTPUT);
@@ -83,30 +88,6 @@ void setInterval() {
 	delay(200);
 }
 
-void listenSlave(int){
-	firstSlave.listen();
-
-	if (firstSlave.isListening()) {
-		if (firstSlave.available() > 0) {
-			recData = "";
-
-			while (firstSlave.available()) {
-				c = firstSlave.read();
-				recData += c;
-			}
-
-			float StempValue = recData.toFloat();
-
-			if (StempValue != 0) {
-				Serial.println(recData);
-				temp = recData;
-				ch = 0;
-			}
-		}
-	}
-
-	setInterval();
-}
 
 /* 
 	Função para quando não há nenhuma emergencia do slave
@@ -212,7 +193,7 @@ void slaveEmergencia(int id){
 	case EMERGENCIA:
 		emitirAlerta(id);
 		break;
-	case EMERGENCIA_A:
+	case EMERGENCIA_A: // TODO: Precisa ter um botão para alterar o estado de emergencia
 		break;
 	default:
 		SLAVES_STATES[id] = EMERGENCIA;
