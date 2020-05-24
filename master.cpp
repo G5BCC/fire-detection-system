@@ -131,10 +131,22 @@ void temperatureSensor(){
 	setInterval();
 }
 
+/* 
+	Função para quando não teve nenhuma resposta do slave
 
+	paramêtro:
+
+		int id: específica o id do slave
+
+	pseudo código:
+
+		adiciona um no contador se o número de chamadas for menor que 3;
+
+		caso seja igual ou maior a tres, o estado para o slave em específico irá para "SEM_RESPOSTA".
+*/
 void semResposta(int id){
-	if(counters[i] < 3){
-		counters[i]++;
+	if(counters[id] < 3){
+		counters[id]++;
 	} else{
 		SLAVES_STATES[id] = SEM_RESPOSTA;
 	}
