@@ -204,7 +204,7 @@ void slaveEmergencia(int id){
 }
 
 void slaveRotina(int id){
-	switch (recData)
+	switch ('1') // entrada dos dados
 	{
 	case '0':
 		semEmergencia(id);
