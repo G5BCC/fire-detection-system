@@ -34,7 +34,9 @@ enum {
 	SEM_RESPOSTA,
 	SEM_EMERGENCIA,
 	ALERTA,
-	EMERGENCIA
+	ALERTA_A,
+	EMERGENCIA,
+	EMERGENCIA_A
 	
 };
 
@@ -168,6 +170,50 @@ void semResposta(int id){
 		SLAVES_STATES[id] = SEM_RESPOSTA;
 	}
 }
+
+void emitirAlerta(int id){
+	/* TODO: uma função que ativa algum dispositivo que emite um alerta para os bombeiros
+
+
+	Requisitos: deve-se informar qual é o slave que está em alerta
+	*/
+}
+
+
+/* 
+	Função para quando há uma mensagem de alerta
+
+	paramêtro:
+
+		int id: específica o id do slave
+
+	pseudo código:
+
+		se o estado do slave especifico for alerta, 
+			toca o sinal.
+		se o estado do slave especifico for um alerta atendido, 
+			aguarda.
+		se nenhuma das ocorrencias for atendido, 
+			estado do slave é sobrescrito para ALERTA e o sinal é tocado.
+*/
+void slaveAlerta(int id){
+	
+	// Para a primeira ocorrencia do alerta
+	switch (STATE_SLAVE[id])
+	{
+	case ALERTA:
+		emitirAlerta(id);
+		break;
+	case ALERTA_A:
+		// aguardar
+	default:
+		STATE_SLAVE[id] = ALERTA;
+		emitirAlerta(id);
+		break;
+	}
+}
+
+
 void setup() {
 	Serial.begin(9600);
 
