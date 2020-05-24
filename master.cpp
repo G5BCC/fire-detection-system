@@ -40,16 +40,16 @@ enum {
 	
 };
 
-int[4] SLAVES_STATES = {
-	slave0 = SEM_EMERGENCIA,
-	slave1 = SEM_EMERGENCIA,
-	slave2 = SEM_EMERGENCIA,
-	slave3 = SEM_EMERGENCIA,
+int SLAVES_STATES[4] = {
+	SEM_EMERGENCIA,
+	SEM_EMERGENCIA,
+	SEM_EMERGENCIA,
+	SEM_EMERGENCIA,
 
-}
+};
 // Not response counter
 
-int* counters = {0,0,0,0};
+int counters[4] = {0,0,0,0};
 
 // Data receive/transmit
 char c;
@@ -83,6 +83,31 @@ void setInterval() {
 	delay(200);
 }
 
+void listenSlave(int){
+	firstSlave.listen();
+
+	if (firstSlave.isListening()) {
+		if (firstSlave.available() > 0) {
+			recData = "";
+
+			while (firstSlave.available()) {
+				c = firstSlave.read();
+				recData += c;
+			}
+
+			float StempValue = recData.toFloat();
+
+			if (StempValue != 0) {
+				Serial.println(recData);
+				temp = recData;
+				ch = 0;
+			}
+		}
+	}
+
+	setInterval();
+}
+
 /* 
 	Função para quando não há nenhuma emergencia do slave
 
@@ -95,7 +120,7 @@ void setInterval() {
 		
 */
 void semEmergencia(int id){
-	SLAVE_STATE[id] = SEM_EMERGENCIA;
+	SLAVES_STATES[id] = SEM_EMERGENCIA;
 
 }
 
@@ -148,7 +173,7 @@ void emitirAlerta(int id){
 void slaveAlerta(int id){
 	
 	// Para a primeira ocorrencia do alerta
-	switch (STATE_SLAVE[id])
+	switch (SLAVES_STATES[id])
 	{
 	case ALERTA:
 		emitirAlerta(id);
@@ -156,7 +181,7 @@ void slaveAlerta(int id){
 	case ALERTA_A:
 		break;
 	default:
-		STATE_SLAVE[id] = ALERTA;
+		SLAVES_STATES[id] = ALERTA;
 		emitirAlerta(id);
 		break;
 	}
@@ -182,7 +207,7 @@ void slaveAlerta(int id){
 */
 void slaveEmergencia(int id){
 	// Para a primeira ocorrencia da emergência
-	switch (STATE_SLAVE[id])
+	switch (SLAVES_STATES[id])
 	{
 	case EMERGENCIA:
 		emitirAlerta(id);
@@ -190,7 +215,7 @@ void slaveEmergencia(int id){
 	case EMERGENCIA_A:
 		break;
 	default:
-		STATE_SLAVE[id] = EMERGENCIA;
+		SLAVES_STATES[id] = EMERGENCIA;
 		emitirAlerta(id);
 		break;
 	}
