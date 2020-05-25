@@ -29,6 +29,29 @@ SoftwareSerial secondSlave(SECOND_SLAVE_RX, SECOND_SLAVE_TX);
 SoftwareSerial thirdSlave(THIRD_SLAVE_RX, THIRD_SLAVE_TX);
 SoftwareSerial fourthSlave(FOURTH_SLAVE_RX, FOURTH_SLAVE_TX);
 
+SoftwareSerial slaves[4] = {firstSlave, secondSlave, thirdSlave, fourthSlave};
+// Slaves states
+enum {
+	SEM_RESPOSTA,
+	SEM_EMERGENCIA,
+	ALERTA,
+	ALERTA_A,
+	EMERGENCIA,
+	EMERGENCIA_A
+	
+};
+
+int SLAVES_STATES[4] = {
+	SEM_EMERGENCIA,
+	SEM_EMERGENCIA,
+	SEM_EMERGENCIA,
+	SEM_EMERGENCIA,
+
+};
+// Not response counter
+
+int counters[4] = {0,0,0,0};
+
 // Data receive/transmit
 char c;
 String recData, recDataOld;
@@ -38,11 +61,15 @@ int ch = 0;
 String temp;
 String gas;
 
+
+void initializeSlavesSerials(){
+	for(int i = 0; i<4; i++){
+		slaves[i].begin(9600);
+	}
+}
+
 void initializeSlaves() {
-	firstSlave.begin(9600);
-	secondSlave.begin(9600);
-	thirdSlave.begin(9600);
-	fourthSlave.begin(9600);
+	initializeSlaves();
 
 	pinMode(FIRST_SLAVE_RX, INPUT);
 	pinMode(FIRST_SLAVE_TX, OUTPUT);
@@ -61,54 +88,138 @@ void setInterval() {
 	delay(200);
 }
 
-void gasSensor() {
-	firstSlave.listen();
 
-	if (firstSlave.isListening()) {
-		if (firstSlave.available() > 0){
-			recData = "";
+/* 
+	Função para quando não há nenhuma emergencia do slave
 
-			while (firstSlave.available()) {
-				c = firstSlave.read();
-				recData += c;
-			}
+	paramêtro:
 
-			int SgasValue = recData.toInt();
+		int id: específica o id do slave
 
-			if (SgasValue != 0) {
-				Serial.println(recData);
-				gas = recData;
-				ch = 1;
-			}
-		}
-	}
+	pseudo código:
+		sobrescreve o estado do slave específicado para "SEM_EMERGENCIA"
+		
+*/
+void semEmergencia(int id){
+	SLAVES_STATES[id] = SEM_EMERGENCIA;
 
-	setInterval();
 }
 
-void temperatureSensor(){
-	firstSlave.listen();
+/* 
+	Função para quando não teve nenhuma resposta do slave
 
-	if (firstSlave.isListening()) {
-		if (firstSlave.available() > 0) {
-			recData = "";
+	paramêtro:
 
-			while (firstSlave.available()) {
-				c = firstSlave.read();
-				recData += c;
-			}
+		int id: específica o id do slave
 
-			float StempValue = recData.toFloat();
+	pseudo código:
 
-			if (StempValue != 0) {
-				Serial.println(recData);
-				temp = recData;
-				ch = 0;
-			}
-		}
+		adiciona um no contador se o número de chamadas for menor que 3;
+
+		caso seja igual ou maior a tres, o estado para o slave em específico irá para "SEM_RESPOSTA".
+*/
+void semResposta(int id){
+	if(counters[id] < 3){
+		counters[id]++;
+	} else{
+		SLAVES_STATES[id] = SEM_RESPOSTA;
+	}
+}
+
+void emitirAlerta(int id){
+	/* TODO: uma função que ativa algum dispositivo que emite um alerta para os bombeiros
+
+
+	Requisitos: deve-se informar qual é o slave que está em alerta
+	*/
+}
+
+
+/* 
+	Função para quando há uma mensagem de alerta
+
+	paramêtro:
+
+		int id: específica o id do slave
+
+	pseudo código:
+
+		se o estado do slave especifico for alerta, 
+			toca o sinal.
+		se o estado do slave especifico for um alerta atendido, 
+			aguarda.
+		se nenhuma das ocorrencias for atendido, 
+			estado do slave é sobrescrito para ALERTA e o sinal é tocado.
+*/
+void slaveAlerta(int id){
+	
+	// Para a primeira ocorrencia do alerta
+	switch (SLAVES_STATES[id])
+	{
+	case ALERTA:
+		emitirAlerta(id);
+		break;
+	case ALERTA_A:
+		break;
+	default:
+		SLAVES_STATES[id] = ALERTA;
+		emitirAlerta(id);
+		break;
+	}
+}
+
+
+/* 
+	Função para quando há uma mensagem de emergência
+
+	paramêtro:
+
+		int id: específica o id do slave
+
+	pseudo código:
+
+	se o estado do slave especifico for emergencia, 
+			toca o sinal.
+		se o estado do slave especifico for um emergencia atendido, 
+			aguarda.
+		se nenhuma das ocorrencias for atendido, 
+			estado do slave é sobrescrito para EMERGENCIA e o sinal é tocado.
+
+*/
+void slaveEmergencia(int id){
+	// Para a primeira ocorrencia da emergência
+	switch (SLAVES_STATES[id])
+	{
+	case EMERGENCIA:
+		emitirAlerta(id);
+		break;
+	case EMERGENCIA_A: // TODO: Precisa ter um botão para alterar o estado de emergencia
+		break;
+	default:
+		SLAVES_STATES[id] = EMERGENCIA;
+		emitirAlerta(id);
+		break;
 	}
 
-	setInterval();
+}
+
+void slaveRotina(int id){
+	switch ('1') // entrada dos dados
+	{
+	case '0':
+		semEmergencia(id);
+		break;
+	case '1':
+		slaveAlerta(id);
+		break;
+	case '2':
+		slaveEmergencia(id);
+		break;
+	default:
+		semResposta(id);
+		break;
+	}
+
 }
 
 void setup() {
@@ -118,11 +229,7 @@ void setup() {
 }
 
 void loop() {
-	switch (ch) {
-		case 0: gasSensor();         break;
-		case 1: temperatureSensor(); break;
-		default:                     break;
-	}
 
+	slaveRotina(0); // Generalizar
 	setInterval();
 }
