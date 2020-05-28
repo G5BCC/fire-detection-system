@@ -10,6 +10,7 @@ Fourth Slave: TX = digital pin 4, RX = digital pin 5
 */
 int const PIN_RX = 11;
 int const PIN_TX = 10;
+int const EMERGENCY_LED = 2;
 
 SoftwareSerial firstSlave(PIN_RX, PIN_TX);
 
@@ -23,19 +24,28 @@ void setInterval() {
 	delay(2000);
 }
 
-void gas() {
+void turnOn(int id) {
+	digitalWrite(id, HIGH);
+}
+
+void turnOff(int id) {
+	digitalWrite(id, LOW);
+}
+
+int gas() {
 	int value = analogRead(PIN_SGAS);
 	recData = String(value);
 
 	delay(250);
 
-	Serial.println("Sending Gas Value: " + recData);
-	firstSlave.print(recData);
+	Serial.println("Gas value: " + recData);
 
 	setInterval();
+
+	return value;
 }
 
-void temperature() {
+float temperature() {
 	int SensorTempTensao = analogRead(PIN_STEMP);
 	float Tensao = SensorTempTensao * 5;
 	Tensao /= 1024;
@@ -45,10 +55,21 @@ void temperature() {
 
 	delay(250);
 
-	Serial.println("Send Temperature: " + recData);
-	firstSlave.print(recData);
+	Serial.println("Temperature: " + recData);
 
 	setInterval();
+
+	return TemperatureC;
+}
+
+bool inEmergency(int gas, float temp) {
+	if ((gas > 130 || temp > 45.0f)) {
+		turnOn(EMERGENCY_LED);
+		return true;
+    } else {
+      	turnOff(EMERGENCY_LED);
+    	return false;
+    }
 }
 
 void setup() {
@@ -56,11 +77,18 @@ void setup() {
 
 	pinMode(PIN_RX, INPUT);
 	pinMode(PIN_TX, OUTPUT);
+	pinMode(EMERGENCY_LED, OUTPUT);
 
 	firstSlave.begin(9600);
 }
 
 void loop() {
-	gas();
-	temperature();
+	int gasVal = gas();
+	int tempVal = temperature();
+
+	if(inEmergency(gasVal, tempVal)) {
+		firstSlave.print("S1: 1");
+	} else {
+		firstSlave.print("S1: 0");
+	}
 }
