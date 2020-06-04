@@ -88,6 +88,15 @@ void setInterval() {
 	delay(200);
 }
 
+void fire(){
+	int lastChar = recData.length() - 1;
+    if(recData.charAt(lastChar) == '1') {
+      turnOn(EMERGENCY_LED);
+    } else {
+      turnOff(EMERGENCY_LED);
+    }
+    Serial.println(recData);
+
 
 /* 
 	Função para quando não há nenhuma emergencia do slave
@@ -102,6 +111,7 @@ void setInterval() {
 */
 void semEmergencia(int id){
 	SLAVES_STATES[id] = SEM_EMERGENCIA;
+	turnOff(EMERGENCY_LED);
 
 }
 
@@ -132,6 +142,12 @@ void emitirAlerta(int id){
 
 	Requisitos: deve-se informar qual é o slave que está em alerta
 	*/
+
+	
+      turnOn(EMERGENCY_LED);
+    
+  
+
 }
 
 
@@ -204,7 +220,8 @@ void slaveEmergencia(int id){
 }
 
 void slaveRotina(int id){
-	switch ('1') // entrada dos dados
+	int lastChar = recData.length() -1;
+	switch (recData.charAt(lastChar)) // entrada dos dados
 	{
 	case '0':
 		semEmergencia(id);
@@ -224,12 +241,10 @@ void slaveRotina(int id){
 
 void setup() {
 	Serial.begin(9600);
-
 	initializeSlaves();
 }
 
 void loop() {
-
 	slaveRotina(0); // Generalizar
 	setInterval();
 }
