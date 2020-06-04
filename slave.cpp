@@ -67,9 +67,9 @@ bool inEmergency(int gas, float temp) {
 		turnOn(EMERGENCY_LED);
 		return true;
     } else {
-      	turnOff(EMERGENCY_LED);
-    	return false;
-    }
+		turnOff(EMERGENCY_LED);
+		return false;
+	}
 }
 
 void setup() {
@@ -91,4 +91,5 @@ void loop() {
 	} else {
 		firstSlave.print("S1: 0");
 	}
+	delay(2000);
 }
