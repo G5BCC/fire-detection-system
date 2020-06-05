@@ -275,6 +275,10 @@ void semResposta(int id){
 		counters[id]++;
 	} else {
 		SLAVES_STATES[id] = SEM_RESPOSTA;
+		Serial.println("******SMTP SERVER******")
+		Serial.println("sendmail: support@G5BCC")
+		Serial.println("content: slave %d not response more than 3 time", id);
+		Serial.println("******SMTP SERVER******")
 	}
 }
 
