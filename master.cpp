@@ -274,11 +274,21 @@ void semResposta(int id){
 	if(counters[id] < 3){
 		counters[id]++;
 	} else {
+		void semResposta(int id){
+	if(counters[id] < 3){
+		counters[id]++;
+	} else {
 		SLAVES_STATES[id] = SEM_RESPOSTA;
-		Serial.println("******SMTP SERVER******")
-		Serial.println("sendmail: support@G5BCC")
-		Serial.println("content: slave %d not response more than 3 time", id);
-		Serial.println("******SMTP SERVER******")
+		Serial.println("********************SMTP SERVER********************");
+		Serial.println("*	sendmail: support@G5BCC.com				*");
+		Serial.print("*	content: slave ");
+      	Serial.print(id + 1);
+      	Serial.print(" not response  ");
+        Serial.print(counters[id]);
+      	Serial.println(" times	  *");
+		Serial.println("********************SMTP SERVER********************");
+	}
+}
 	}
 }
 
