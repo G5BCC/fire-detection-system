@@ -35,16 +35,15 @@ SoftwareSerial thirdSlave(THIRD_SLAVE_RX, THIRD_SLAVE_TX);
 SoftwareSerial fourthSlave(FOURTH_SLAVE_RX, FOURTH_SLAVE_TX);
 
 SoftwareSerial slaves[4] = {firstSlave, secondSlave, thirdSlave, fourthSlave};
+
 // Slaves states
 enum {
+	OCIOSO,
 	SEM_RESPOSTA,
 	SEM_EMERGENCIA,
 	ALERTA,
-	ALERTA_A,
 	EMERGENCIA,
-	EMERGENCIA_A
-	
-};
+} STATE = OCIOSO;
 
 int SLAVES_STATES[4] = {
 	SEM_EMERGENCIA,
@@ -53,9 +52,9 @@ int SLAVES_STATES[4] = {
 	SEM_EMERGENCIA,
 
 };
-// Not response counter
 
-int counters[4] = {0,0,0,0};
+// No response counter
+int counters[4] = {0, 0, 0, 0};
 
 // Data receive/transmit
 char charSlave1;
@@ -68,9 +67,10 @@ String recDataSlave2;
 String recDataSlave3;
 String recDataSlave4;
 
-// Sensor Variables
-String temp;
-String gas;
+// Slave state counter
+int ch = 1;
+
+int lastChar;
 
 void turnOn(int id) {
 	digitalWrite(id, HIGH);
@@ -102,13 +102,20 @@ void listenSlave1() {
 		}
 	}
 
+	// Check if the data arrived/exists
 	if(recDataSlave1 != "") {
-		Serial.println(recDataSlave1);
+		lastChar = recDataSlave1.length() - 1;
+		if(recDataSlave1[lastChar] == '1') {
+			Serial.println(recDataSlave1);
+			setAlert(1);
+			STATE = ALERTA;
+		} else {
+			Serial.println(recDataSlave1);
+		}
+		ch = 2;
 	} else {
 		Serial.println("No data received at slave 1");
 	}
-
-	slaveRotina(0);
 	delay(1000);
 }
 
@@ -118,6 +125,7 @@ void listenSlave2() {
 		Serial.println("Listening slave 2");
 		delay(1000);
 		if(secondSlave.available() > 0) {
+			Serial.println("Reading slave 2");
 			recDataSlave2 = "";
 			while(secondSlave.available()) {
 				charSlave2 = secondSlave.read();
@@ -126,12 +134,20 @@ void listenSlave2() {
 		}
 	}
 
+	// Check if the data arrived/exists
 	if(recDataSlave2 != "") {
-		Serial.println(recDataSlave2);
+		lastChar = recDataSlave2.length() - 1;
+		if(recDataSlave2[lastChar] == '1') {
+			Serial.println(recDataSlave2);
+			setAlert(2);
+			STATE = ALERTA;
+		} else {
+			Serial.println(recDataSlave2);
+		}
+		ch = 3;
 	} else {
 		Serial.println("No data received at slave 2");
 	}
-	slaveRotina(1);
 	delay(1000);
 }
 
@@ -142,6 +158,7 @@ void listenSlave3() {
 		Serial.println("Listening slave 3");
 		delay(1000);
 		if(thirdSlave.available() > 0) {
+			Serial.println("Reading slave 3");
 			recDataSlave3 = "";
 			while(thirdSlave.available()) {
 				charSlave3 = thirdSlave.read();
@@ -150,12 +167,20 @@ void listenSlave3() {
 		}
 	}
 
+	// Check if the data arrived/exists
 	if(recDataSlave3 != "") {
-		Serial.println(recDataSlave3);
+		lastChar = recDataSlave3.length() - 1;
+		if(recDataSlave3[lastChar] == '1') {
+			Serial.println(recDataSlave3);
+			setAlert(3);
+			STATE = ALERTA;
+		} else {
+			Serial.println(recDataSlave3);
+		}
+		ch = 4;
 	} else {
 		Serial.println("No data received at slave 3");
 	}
-	slaveRotina(2);
 	delay(1000);
 }
 
@@ -165,6 +190,7 @@ void listenSlave4() {
 		Serial.println("Listening slave 4");
 		delay(1000);
 			if(fourthSlave.available() > 0) {
+			Serial.println("Reading slave 4");
 			recDataSlave4 = "";
 			while(fourthSlave.available()) {
 				charSlave4 = fourthSlave.read();
@@ -173,24 +199,34 @@ void listenSlave4() {
 		}
 	}
 
+	// Check if the data arrived/exists
 	if(recDataSlave4 != "") {
-		Serial.println(recDataSlave4);
+		lastChar = recDataSlave4.length() - 1;
+		if(recDataSlave4[lastChar] == '1') {
+			Serial.println(recDataSlave4);
+			setAlert(4);
+			STATE = ALERTA;
+		} else {
+			Serial.println(recDataSlave4);
+		}
+		ch = 1;
 	} else {
 		Serial.println("No data received at slave 4");
 	}
-
-	slaveRotina(3);
 	delay(1000);
 }
 
 void listenSlaves() {
-	listenSlave1();
-
-	listenSlave2();
-			
-	listenSlave3();
-
-	listenSlave4();
+	switch(ch) {
+		case 1: listenSlave1();
+			break;
+		case 2: listenSlave2();
+			break;
+		case 3: listenSlave3();
+			break;
+		case 4: listenSlave4();
+			break;
+	}
 }
 
 void initializeSlaves() {
@@ -216,7 +252,16 @@ void setInterval() {
 	delay(200);
 }
 
-void setEmergency(int id) {
+void sendAlert(int id){
+	/* TODO: uma função que ativa algum dispositivo que emite um alerta para os bombeiros
+
+
+	Requisitos: deve-se informar qual é o slave que está em alerta
+	*/
+	Serial.println("O slave " + String(id) + " esta pegando fogo");
+}
+
+void setAlert(int id) {
 	switch (id) {
 		case 1:
 			turnOn(LED_S_1);
@@ -239,22 +284,11 @@ void setEmergency(int id) {
 			turnOff(LED_S_4);
 			break;
 	}
-	SLAVES_STATES[id] = EMERGENCIA;
+	sendAlert(id);
 }
 
-/* 
-	Função para quando não há nenhuma emergencia do slave
-
-	paramêtro:
-
-		int id: específica o id do slave
-
-	pseudo código:
-		sobrescreve o estado do slave específicado para "SEM_EMERGENCIA"
-		
-*/
-void semEmergencia(int id){
-	SLAVES_STATES[id] = SEM_EMERGENCIA;
+void slaveEmergencia() {
+	STATE = OCIOSO;
 }
 
 /* 
@@ -278,149 +312,12 @@ void semResposta(int id){
 	}
 }
 
-void emitirAlerta(int id){
-	/* TODO: uma função que ativa algum dispositivo que emite um alerta para os bombeiros
 
-
-	Requisitos: deve-se informar qual é o slave que está em alerta
-	*/
-	setEmergency(id);
-	Serial.println("O slave " + String(id) + " está pegando fogo");
-}
-
-void readIncomingData(int id) {
-	int lastChar;
-	switch(id) {
-		case 1:
-			lastChar = recDataSlave1.length() - 1;
-			if(recDataSlave1.charAt(lastChar) == '1') {
-				turnOn(LED_S_1);
-			} else {
-				turnOff(LED_S_1);
-			}
-			Serial.println(recDataSlave1);
-			break;
-		case 2:
-			lastChar = recDataSlave2.length() - 1;
-			if(recDataSlave2.charAt(lastChar) == '1') {
-				turnOn(LED_S_2);
-			} else {
-				turnOff(LED_S_2);
-			}
-			Serial.println(recDataSlave2);
-			break;
-		case 3:
-			lastChar = recDataSlave3.length() - 1;
-			if(recDataSlave3.charAt(lastChar) == '1') {
-				turnOn(LED_S_3);
-			} else {
-				turnOff(LED_S_3);
-			}
-			Serial.println(recDataSlave3);
-			break;
-		case 4:
-			lastChar = recDataSlave4.length() - 1;
-			if(recDataSlave4.charAt(lastChar) == '1') {
-				turnOn(LED_S_4);
-			} else {
-				turnOff(LED_S_4);
-			}
-			Serial.println(recDataSlave4);
-			break;
+void slaveRotina(){
+	switch (STATE) {
+		case OCIOSO: listenSlaves(); break;
+		case ALERTA: slaveEmergencia(); break;
 	}
-}
-
-/* 
-	Função para quando há uma mensagem de alerta
-
-	paramêtro:
-
-		int id: específica o id do slave
-
-	pseudo código:
-
-		se o estado do slave especifico for alerta, 
-			toca o sinal.
-		se o estado do slave especifico for um alerta atendido, 
-			aguarda.
-		se nenhuma das ocorrencias for atendido, 
-			estado do slave é sobrescrito para ALERTA e o sinal é tocado.
-*/
-void slaveAlerta(int id){
-	
-	// Para a primeira ocorrencia do alerta
-	switch (SLAVES_STATES[id])
-	{
-	case ALERTA:
-		emitirAlerta(id);
-		break;
-	case ALERTA_A:
-		break;
-	default:
-		SLAVES_STATES[id] = ALERTA;
-		emitirAlerta(id);
-		break;
-	}
-}
-
-
-/* 
-	Função para quando há uma mensagem de emergência
-
-	paramêtro:
-
-		int id: específica o id do slave
-
-	pseudo código:
-
-	se o estado do slave especifico for emergencia, 
-			toca o sinal.
-		se o estado do slave especifico for um emergencia atendido, 
-			aguarda.
-		se nenhuma das ocorrencias for atendido, 
-			estado do slave é sobrescrito para EMERGENCIA e o sinal é tocado.
-
-*/
-void slaveEmergencia(int id){
-	// Para a primeira ocorrencia da emergência
-	switch (SLAVES_STATES[id])
-	{
-	case EMERGENCIA:
-		emitirAlerta(id);
-		break;
-	case EMERGENCIA_A: // TODO: Precisa ter um botão para alterar o estado de emergencia
-		break;
-	default:
-		SLAVES_STATES[id] = EMERGENCIA;
-		emitirAlerta(id);
-		break;
-	}
-
-}
-
-void slaveRotina(int id){
-	int indexChar = recDataSlave1.charAt(lastChar);
-	readIncomingData(id+1);
-
-	switch ('1') // entrada dos dados
-	{
-	case '0':
-		// Ler dados
-		semEmergencia(id);
-		break;
-	case '1':
-		// Verificar se existe alguma emergência
-		slaveAlerta(id);
-		break;
-	case '2':
-		// Acionar emergência
-		slaveEmergencia(id);
-		break;
-	default:
-		semResposta(id);
-		break;
-	}
-
 }
 
 void setup() {
@@ -431,7 +328,5 @@ void setup() {
 }
 
 void loop() {
-	
-	listenSlaves();
-	
+	slaveRotina();
 }
