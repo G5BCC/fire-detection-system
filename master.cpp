@@ -24,18 +24,10 @@ int const THIRD_SLAVE_TX = 6;
 int const FOURTH_SLAVE_RX = 5;
 int const FOURTH_SLAVE_TX = 4;
 
-<<<<<<< HEAD
-// LED pins
-int const LED_S1 = 14;
-int const LED_S2 = 15;
-int const LED_S3 = 16;
-int const LED_S4 = 17;
-=======
 int const LED_S_1 = 14;
 int const LED_S_2 = 15;
 int const LED_S_3 = 16;
 int const LED_S_4 = 17;
->>>>>>> master
 
 SoftwareSerial firstSlave(FIRST_SLAVE_RX, FIRST_SLAVE_TX);
 SoftwareSerial secondSlave(SECOND_SLAVE_RX, SECOND_SLAVE_TX);
