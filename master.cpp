@@ -400,7 +400,8 @@ void slaveEmergencia(int id){
 
 void slaveRotina(int id){
 	int indexChar = recDataSlave1.charAt(lastChar);
-	readIncomingData(id);
+	readIncomingData(id+1);
+
 	switch ('1') // entrada dos dados
 	{
 	case '0':
