@@ -21,7 +21,7 @@ int const PIN_SGAS = A1;
 int const PIN_STEMP = A0;
 
 void setInterval() {
-	delay(2000);
+	delay(50); // Delay = 50*id (1,2,3,4)
 }
 
 void turnOn(int id) {
