@@ -167,7 +167,7 @@ void listenSlave4() {
 			if(fourthSlave.available() > 0) {
 			recDataSlave4 = "";
 			while(fourthSlave.available()) {
-				charSlave4 = thirdSlave.read();
+				charSlave4 = fourthSlave.read();
 				recDataSlave4 += charSlave4;
 			}
 		}
