@@ -62,8 +62,8 @@ float temperature() {
 	return TemperatureC;
 }
 
-bool inFireEmergency(float temp) {
-	if (temp > 45.0f)) {
+bool inEmergency(int gas, float temp) {
+	if ((gas > 130 || temp > 45.0f)) {
 		turnOn(EMERGENCY_LED);
 		return true;
     } else {
@@ -72,16 +72,6 @@ bool inFireEmergency(float temp) {
     }
 }
 
-
-bool inGasEmergency(int gas) {
-	if (gas > 130)) {
-		turnOn(EMERGENCY_LED);
-		return true;
-    } else {
-      	turnOff(EMERGENCY_LED);
-    	return false;
-    }
-}
 
 void setup() {
 	Serial.begin(9600);
@@ -97,11 +87,9 @@ void loop() {
 	int gasVal = gas();
 	int tempVal = temperature();
 
-	if(inFireEmergency(tempVal)) {
-		firstSlave.print("lixo S1: 1");
-	} else if(inFireEmergency(gasVal)){
-		firstSlave.print("lixo S2: 2")
-	}else{
-		firstSlave.print("lixo S1: 0");
+	if(inEmergency(gasVal, tempVal)) {
+		firstSlave.print("S1: 1");
+	} else {
+		firstSlave.print("S1: 0");
 	}
 }
